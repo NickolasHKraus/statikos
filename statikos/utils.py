@@ -8,6 +8,47 @@ from pathlib import Path
 import yaml
 
 
+def rm(filename: str) -> None:
+    """
+    Remove a file or directory.
+
+    *From the BSD General Commands Manual*:
+    The rm utility attempts to remove the non-directory type files specified on
+    the command line.
+
+    -d    Attempt to remove directories as well as other types of files.
+
+    -f    Attempt to remove the files without prompting for confirmation.
+
+    -R    Attempt to remove the file hierarchy rooted in each file argument.
+          The -R option implies the -d option.
+
+    -r    Equivalent to -R.
+
+    This function attempts to emulate the `rm -rf` command.
+
+    :type filename: str
+    :param filename: name of file
+
+    :rtype: None
+    :return: None
+    """
+    obj = Path(filename)
+    if obj.is_file():
+        print(filename)
+        # obj.unlink()
+    elif obj.is_dir():
+        for f in os.listdir(filename):
+            print(f'{filename}/{f}')
+            # rm(f'{filename}/{f}')
+        else:
+            print(filename)
+            # obj.rmdir()
+    else:
+        raise FileNotFoundError
+        yield
+
+
 def touch(filename: str) -> None:
     """
     Touch a file.

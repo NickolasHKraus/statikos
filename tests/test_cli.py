@@ -30,17 +30,29 @@ class CliTestCase(AWSBaseTestCase):
         self.assertEqual(1, result.exit_code)
         self.assertIn('Usage', result.output)
 
-    def test_cli_create(self):
+    def test_create(self):
         result = self.runner.invoke(cli, ['create'])
         self.assertIs(None, result.exception)
         self.assertEqual(0, result.exit_code)
         self.statikos.create.assert_called_once()
 
-    def test_cli_deploy(self):
+    def test_deploy(self):
         result = self.runner.invoke(cli, ['deploy'])
         self.assertIs(None, result.exception)
         self.assertEqual(0, result.exit_code)
         self.statikos.deploy.assert_called_once()
+
+    def test_deploy_dry_run(self):
+        result = self.runner.invoke(cli, ['deploy', '--dry-run'])
+        self.assertIs(None, result.exception)
+        self.assertEqual(0, result.exit_code)
+        self.statikos.deploy.assert_called_once()
+
+    def test_publish(self):
+        result = self.runner.invoke(cli, ['publish'])
+        self.assertIs(None, result.exception)
+        self.assertEqual(0, result.exit_code)
+        self.statikos.publish.assert_called_once()
 
     def test_cli_remove(self):
         result = self.runner.invoke(cli, ['remove'])

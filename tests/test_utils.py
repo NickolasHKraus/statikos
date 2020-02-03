@@ -19,6 +19,10 @@ class UtilsTestCase(BaseTestCase):
         self.mock_path = patch('statikos.utils.Path').start()
         self.mock_path.return_value = self.path
 
+    def test_rm(self):
+        # utils.rm('filename')
+        return
+
     def test_touch(self):
         utils.touch('filename')
         self.path.touch.assert_called_once()

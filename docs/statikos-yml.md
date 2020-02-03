@@ -1,21 +1,23 @@
 # `statikos.yml`
 
+## v1.0.0
+---
+
 The `statikos.yml` file has the following properties:
 
 `statikos.yml`
 
 ```yaml
-stack_name: string
-domain_name: string
-# subject_alternative_names:
-#   - string
-# validation_method: string
+service:
+  name: string
+  domain_name: string
+  content: string
 ```
 
-## `StackName`
+## Properties
 
-## `DomainName
+### `name`
 
-## `SubjectAlternativeNames`
+### `domain_name`
 
-## `ValidationMethod`
+### `content`

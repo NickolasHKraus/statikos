@@ -6,7 +6,7 @@ from unittest.mock import Mock, patch
 from botocore import exceptions
 
 from statikos import utils
-from statikos.api import CloudFormation
+from statikos.api import CloudFormation, S3
 from statikos.exceptions import InvalidTemplate
 
 from .base import AWSBaseTestCase
@@ -148,3 +148,13 @@ class CloudFormationTestCase(AWSBaseTestCase):
         self.cfn.client.validate_template.assert_called_with(
             TemplateBody='{}',
         )
+
+
+class S3TestCase(AWSBaseTestCase):
+    def setUp(self):
+        super(S3TestCase, self).setUp()
+        self.cfn = S3()
+        self.cfn.client = Mock()
+
+    def test_sync(self):
+        return

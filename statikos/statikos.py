@@ -43,20 +43,36 @@ class Statikos():
         except FileNotFoundError:
             raise ConfigNotFound
 
-    def _configure(self) -> None:
+    def _setup(self) -> None:
         """
-        Configure the current directory for Statikos.
+        Setup the current directory.
 
-        The following resources are created:
-          - .statikos
-          - .statikos/cloudformation.yml
-          - .statikos/parameters.properties
+        The following artifacts are created:
+          - .statikos/
+          - .statikos/cloudformation.json
+          - statikos.yml
 
         :rtype: None
         :return: None
         """
         utils.mkdir(self.STATIKOS_DIR)
         utils.touch(self.CLOUDFORMATION_JSON)
+        utils.touch(self.STATIKOS_YML)
+
+    def _teardown(self) -> None:
+        """
+        Teardown the current directory.
+
+        The following artifacts are removed:
+          - .statikos/
+          - .statikos/cloudformation.json
+          - statikos.yml
+
+        :rtype: None
+        :return: None
+        """
+        utils.rm(self.STATIKOS_DIR)
+        utils.rm(self.STATIKOS_YML)
 
     def create(self) -> None:
         """
@@ -65,11 +81,11 @@ class Statikos():
         :rtype: None
         :return: None
         """
-        self._configure()
+        self._setup()
         template = create_template(parameters=self.config)
         utils.write_json_file(template.to_dict(), self.CLOUDFORMATION_JSON)
 
-    def deploy(self) -> None:
+    def deploy(self, dry_run: bool) -> None:
         """
         Deploy the CloudFormation stack.
 
@@ -77,17 +93,38 @@ class Statikos():
         :return: None
         """
         self.create()
+
+        if dry_run:
+            return
+
         stack_name = self.config['stack_name']
         self.cfn.deploy(
             stack_name=stack_name, template_file=self.CLOUDFORMATION_JSON
         )
+        self.publish()
 
-    def remove(self) -> None:
+    def generate(self, command: str) -> None:
         """
-        Remove the CloudFormation stack.
+        Generate static content.
+        """
+
+    def publish(self) -> None:
+        """
+        Upload content to S3.
+        """
+        self.cfn.sync()
+
+    def remove(self, stack_only: str) -> None:
+        """
+        Remove the CloudFormation stack and all Statikos artifacts.
+
+        :type stack_only: bool
+        :param stack_only: whether to only remove the CloudFormation stack
 
         :rtype: None
         :return: None
         """
+        if not stack_only:
+            self._teardown()
         stack_name = self.config['stack_name']
         self.cfn.delete(stack_name=stack_name)

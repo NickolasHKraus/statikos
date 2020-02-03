@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """AWS API module."""
 
+import os
 import boto3
 import botocore
 from botocore import exceptions
+from pathlib import Path
 
 from . import utils
 from .exceptions import InvalidTemplate
@@ -104,7 +106,7 @@ class CloudFormation(AWS):
         :rtype: None
         :return: None
         """
-        template_body = str(utils.read_file(template_file))
+        template_body = utils.read_file(template_file)
         if not self.is_valid_template(template_body):
             raise InvalidTemplate
         parameters = []
@@ -165,7 +167,7 @@ class CloudFormation(AWS):
         return True
 
     def create_stack(
-        self, stack_name: str, template_body: str, parameters: list
+        self, stack_name: str, template_body: str, parameters: list = []
     ) -> dict:
         """
         Create a CloudFormation stack as specified in the template.
@@ -207,7 +209,7 @@ class CloudFormation(AWS):
         )
 
     def update_stack(
-        self, stack_name: str, template_body: str, parameters: list
+        self, stack_name: str, template_body: str, parameters: list = []
     ) -> dict:
         """
         Update a CloudFormation stack as specified in the template.
@@ -247,7 +249,7 @@ class CloudFormation(AWS):
             Parameters=parameters
         )
 
-    def delete_stack(self, stack_name: str):
+    def delete_stack(self, stack_name: str) -> None:
         """
         Delete a CloudFormation stack.
 
@@ -259,7 +261,7 @@ class CloudFormation(AWS):
         """
         return self.client.delete_stack(StackName=stack_name)
 
-    def validate_template(self, template_body: str):
+    def validate_template(self, template_body: str) -> dict:
         """
         Validate a specified CloudFormation template.
 
@@ -270,3 +272,81 @@ class CloudFormation(AWS):
         :return: a dict containing the response for the request
         """
         return self.client.validate_template(TemplateBody=template_body, )
+
+
+class S3(AWS):
+    """
+    Wrapper for a low-level client representing Amazon S3.
+    """
+    SERVICE_NAME = 's3'
+
+    def __init__(self, *args, **kwargs):
+        """
+        Create a new `S3` object.
+
+        :rtype: None
+        :return: None
+        """
+        super(S3, self).__init__(*args, **kwargs)
+
+
+    def sync(self, local_path: str, s3_uri: str) -> None:
+        """
+        Sync directories and S3 prefixes.
+
+        This is a high-level function that is meant to emulate the `sync`
+        command of the AWS CLI. This command does not have a corresponding
+        method in the AWS SDK for Python.
+
+        Recursively copies new and updated files from the source directory to
+        the destination. Only creates folders in the destination if they
+        contain one or more files.
+
+        :type local_path: str
+        :param local_path: name of file
+        :type filename: str
+        :param filename: name of file
+        """
+
+
+        # delete objects in S3
+        # ...
+
+        obj = Path(local_path)
+        if obj.is_file():
+            # upload object to S3
+            # ...
+            pass
+        elif obj.is_dir():
+            # upload prefix to S3
+            # ...
+            pass
+            for f in os.listdir(local_path):
+                # upload files recursively to S3
+                # ...
+                self.sync(f)
+                pass
+        else:
+            raise FileNotFoundError
+
+        return
+
+    def bucket_exists(self, bucket_name: str) -> bool:
+        """
+        Determine if a S3 Bucket exists.
+
+        This is a high-level function that uses the DescribeStacks API endpoint
+        to determine if the specified CloudFormation stack exists.
+
+        :type stack_name: str
+        :param stack_name: name of the stack
+
+        :rtype: bool
+        :return: whether the CloudFormation stack exists
+        """
+        try:
+            self.client.describe_stacks(StackName=stack_name)
+        except exceptions.ClientError:
+            return False
+        return True
+
